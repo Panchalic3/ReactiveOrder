@@ -17,6 +17,7 @@ public class OrderApiClient {
     private WebClient webClient;
 
     public Mono<OrderResponse> placeOrder(OrderRequest orderRequestValue, String header) {
+        System.out.println("Before calling Order API - Thread: " + Thread.currentThread().getName());
 
         Mono<OrderResponse> orderResponseMono =
                 webClient.post()
@@ -24,7 +25,11 @@ public class OrderApiClient {
                         .bodyValue(orderRequestValue)
                         .header("Authorization", header)
                         .retrieve()
-                        .bodyToMono(OrderResponse.class);
+                        .bodyToMono(OrderResponse.class)
+                        .doOnNext(response ->
+                                System.out.println("Response received - Thread: " + Thread.currentThread().getName())
+                        );
+
 
         return orderResponseMono;
     }

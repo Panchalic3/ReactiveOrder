@@ -22,7 +22,6 @@ public class ReactiveOrderController {
     @PostMapping("/post")
     public Mono<OrderResponse> placeOrder(@RequestBody OrderRequest orderRequestValue,
                                           @RequestHeader("Authorization") String header) {
-        log.info("in controller");
 
         Mono<OrderResponse> orderResponseMono =
                 reactiveOrderService.placeOrder(orderRequestValue, header);
