@@ -9,6 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Component
 @AllArgsConstructor
 public class OrderApiClient {
@@ -19,17 +21,17 @@ public class OrderApiClient {
     public Mono<OrderResponse> placeOrder(OrderRequest orderRequestValue, String header) {
         System.out.println("Before calling Order API - Thread: " + Thread.currentThread().getName());
 
-        Mono<OrderResponse> orderResponseMono =
-                webClient.post()
-                        .uri("/placeOrder")
-                        .bodyValue(orderRequestValue)
-                        .header("Authorization", header)
-                        .retrieve()
-                        .bodyToMono(OrderResponse.class)
-                        .doOnNext(response ->
-                                System.out.println("Response received - Thread: " + Thread.currentThread().getName())
-                        );
-
+        Mono<OrderResponse> orderResponseMono = //Creates a reactive pipeline that will emit one OrderResponse.
+                webClient.post()//Creates an HTTP POST request using Spring WebClient.
+                        .uri("/placeOrder")//Sets the endpoint path that will be called.
+                        .bodyValue(orderRequestValue)//Adds the request body to the HTTP request.
+                        .header("Authorization", header)//Adds Authorization header to the request.
+                        .retrieve()//Sends the HTTP request and prepares to retrieve the response.
+                        .bodyToMono(OrderResponse.class)//Converts the HTTP response body into a Mono<OrderResponse>.JSON response → OrderResponse object
+                        .retry(3)//Retries the HTTP call up to 3 times if an error occurs.
+                        .doOnNext(response -> System.out.println("Response received - Thread: " + Thread.currentThread().getName()))
+                        .map(orderResponse -> { orderResponse.setReactiveMsg("heh");
+                        return orderResponse;});
 
         return orderResponseMono;
     }
@@ -41,7 +43,13 @@ public class OrderApiClient {
                         .uri("/all")
                         .header("Authorization", header)
                         .retrieve()
-                        .bodyToFlux(OrderRequest.class);
+                        .bodyToFlux(OrderRequest.class)
+                        .onBackpressureBuffer()
+                        .map(orderRequest -> {
+                            orderRequest.setReactiveMsg("this is reactive msg");
+                        return orderRequest;
+                        })
+                ;
 
         return orderFlux;
     }

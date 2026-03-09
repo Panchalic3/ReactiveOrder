@@ -16,4 +16,6 @@ public class OrderRequest {
     private List<Integer> quantities;
     private String paymentMethod;
     private String status;
+
+    private  String reactiveMsg;
 }

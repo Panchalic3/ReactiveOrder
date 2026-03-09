@@ -4,6 +4,7 @@ import com.example.demo.service.ReactiveOrderService;
 import com.example.demo.dto.OrderRequest;
 import com.example.demo.dto.OrderResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,7 +30,7 @@ public class ReactiveOrderController {
         return orderResponseMono;
     }
 
-    @GetMapping("/all")
+    @GetMapping(value = "/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OrderRequest> getAllOrders(@RequestHeader("Authorization") String header) {
 
         Flux<OrderRequest> orderFlux =

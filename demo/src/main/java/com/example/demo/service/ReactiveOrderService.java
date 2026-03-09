@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @AllArgsConstructor
@@ -18,18 +19,26 @@ public class ReactiveOrderService {
     private OrderApiClient orderApiClient;
 
     public Mono<OrderResponse> placeOrder(OrderRequest orderRequestValue, String header) {
-        log.info("in service");
 
-        Mono<OrderResponse> orderResponseMono =
-                orderApiClient.placeOrder(orderRequestValue, header);
-
+        Mono<OrderResponse>     orderResponseMono =
+                orderApiClient.placeOrder(orderRequestValue, header)
+                        .map(response -> {
+                            response.setReactiveMsg("This is reactive api msg");
+                            return response;
+                        });
         return orderResponseMono;
     }
 
     public Flux<OrderRequest> getAllOrders(String header) {
 
         Flux<OrderRequest> orderFlux =
-                orderApiClient.getAllOrders(header);
+                orderApiClient.getAllOrders(header)
+                        .parallel()
+                        .runOn(Schedulers.parallel())
+                        .filter(orderRequest -> orderRequest.getItems().size() >= 1)
+                        .doOnNext(res -> {System.out.println("patallel");})
+                        .sequential()
+        ;
 
         return orderFlux;
     }

@@ -14,6 +14,7 @@ public class OrderResponse {
     private String orderId;
     private String status;
     private String message;
+    private String reactiveMsg;
 
 }
 
