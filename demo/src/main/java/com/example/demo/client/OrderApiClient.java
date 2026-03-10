@@ -30,8 +30,10 @@ public class OrderApiClient {
                         .bodyToMono(OrderResponse.class)//Converts the HTTP response body into a Mono<OrderResponse>.JSON response → OrderResponse object
                         .retry(3)//Retries the HTTP call up to 3 times if an error occurs.
                         .doOnNext(response -> System.out.println("Response received - Thread: " + Thread.currentThread().getName()))
-                        .map(orderResponse -> { orderResponse.setReactiveMsg("heh");
-                        return orderResponse;});
+                        .map(orderResponse -> {
+                            orderResponse.setReactiveMsg("heh");
+                            return orderResponse;
+                        });
 
         return orderResponseMono;
     }
